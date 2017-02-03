@@ -10,7 +10,7 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.100%{?git_rel}%{?dist}
+Release:	0.101%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -38,7 +38,7 @@ Requires:	python3-PyYAML
 Requires:	python3-yui		>= 1.1.1-10
 
 # Provide functionality with least dependencies on every system.
-#Requires:	libyui-ncurses-mga
+Requires:	libyui-mga-ncurses
 
 %description
 %{name} is a DNF frontend, based on rpmdragora from Mageia
@@ -124,6 +124,9 @@ fi
 
 
 %changelog
+* Fri Feb 03 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.101.gitcc4e556.20170202
+- Add Requires: libyui-mga-ncurses for functionality with low dependencies
+
 * Thu Feb 02 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.100.gitcc4e556.20170202
 - Initial import (rhbz#1418788)
 - Bump to 0.100 to superseed builds from COPR
