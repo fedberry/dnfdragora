@@ -1,5 +1,5 @@
 # No proper release-tags, yet.  :(
-%global commit cc4e556959c68817c1d0ca8728fd140dfe6785c6
+%global commit 4d872aba86f3988f3bc052d70dee7db1cf6b3dff
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170202
 %global git_ver -git%{shortcommit}.%{gitdate}
@@ -10,7 +10,7 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.101%{?git_rel}%{?dist}
+Release:	0.102%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -124,6 +124,9 @@ fi
 
 
 %changelog
+* Fri Feb 03 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.102.git4d872ab.20170202
+- New snapshot
+
 * Fri Feb 03 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.101.gitcc4e556.20170202
 - Add Requires: libyui-mga-ncurses for functionality with low dependencies
 
