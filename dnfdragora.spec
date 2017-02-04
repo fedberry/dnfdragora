@@ -1,5 +1,5 @@
 # No proper release-tags, yet.  :(
-%global commit f2bb4da7fd2f6570c1521193decacf48a1bdbcfe
+%global commit 2c34e5206fc31f58a6712f9094f655c520663423
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170204
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -10,14 +10,12 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.108%{?git_rel}%{?dist}
+Release:	0.109%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
 URL:		https://github.com/manatools/%{name}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
-
-Patch0:		%{url}/pull/12.patch#/%{name}-0.0.0-CMake_build_po.patch
 
 BuildArch:	noarch
 
@@ -58,6 +56,7 @@ pushd %{_cmake_build_subdir}
 %cmake								\
 	-DCHECK_RUNTIME_DEPENDENCIES=ON				\
 	-DENABLE_COMPS=ON					\
+	-Wno-dev						\
 	..
 popd
 %make_build -C %{_cmake_build_subdir}
@@ -119,6 +118,11 @@ fi
 
 
 %changelog
+* Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.109.git20170204.2c34e52
+- New snapshot
+- Drop patch, upstreamed
+- Run CMake with '-Wno-dev'-flag
+
 * Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.108.git20170204.f2bb4da
 - Swap date and commit-sha in release-tag
 
