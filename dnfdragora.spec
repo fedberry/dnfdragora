@@ -2,15 +2,15 @@
 %global commit f2bb4da7fd2f6570c1521193decacf48a1bdbcfe
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170204
-%global git_ver -git%{shortcommit}.%{gitdate}
-%global git_rel .git%{shortcommit}.%{gitdate}
+%global git_ver -git%{gitdate}.%{shortcommit}
+%global git_rel .git%{gitdate}.%{shortcommit}
 
 # CMake builds out of tree.
 %global _cmake_build_subdir %{_target_platform}
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.107%{?git_rel}%{?dist}
+Release:	0.108%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -119,6 +119,9 @@ fi
 
 
 %changelog
+* Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.108.git20170204.f2bb4da
+- Swap date and commit-sha in release-tag
+
 * Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.107.gitf2bb4da.20170204
 - Add patch to build and install translations with CMake
 
