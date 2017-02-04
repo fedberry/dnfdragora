@@ -10,12 +10,14 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.106%{?git_rel}%{?dist}
+Release:	0.107%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
 URL:		https://github.com/manatools/%{name}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
+
+Patch0:		%{url}/pull/12.patch#/%{name}-0.0.0-CMake_build_po.patch
 
 BuildArch:	noarch
 
@@ -59,11 +61,11 @@ pushd %{_cmake_build_subdir}
 	..
 popd
 %make_build -C %{_cmake_build_subdir}
-tools/po-compile.sh
 
 
 %install
 %make_install -C %{_cmake_build_subdir}
+%find_lang %{name}
 
 # Create man-page.
 %{__mkdir_p} %{buildroot}%{_mandir}/man1
@@ -73,10 +75,6 @@ export PYTHONPATH='%{buildroot}%{python3_sitelib}'
 	-o %{buildroot}%{_mandir}/man1/%{name}.1		\
 	%{buildroot}%{_bindir}/%{name}
 unset PYTHONPATH
-
-# Install locales.
-%{__cp} -pr share/locale %{buildroot}%{_datadir}
-%find_lang %{name}
 
 
 %check
@@ -121,6 +119,9 @@ fi
 
 
 %changelog
+* Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.107.gitf2bb4da.20170204
+- Add patch to build and install translations with CMake
+
 * Sat Feb 04 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.106.gitf2bb4da.20170204
 - New snapshot
 
