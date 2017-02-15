@@ -10,7 +10,7 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.112%{?git_rel}%{?dist}
+Release:	0.113%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -118,6 +118,9 @@ fi
 
 
 %changelog
+* Wed Feb 15 2017 Igor Gnatenko <ignatenko@redhat.com> - 0.0.0-0.113.git20170213.289d170
+- Rebuild for brp-python-bytecompile
+
 * Tue Feb 14 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.112.git20170213.289d170
 - New snapshot
 
