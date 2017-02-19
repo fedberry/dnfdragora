@@ -1,7 +1,7 @@
 # No proper release-tags, yet.  :(
-%global commit 289d17055e33c39e5892973fd2d67a1e85392463
+%global commit 58bd4242a621ea109d33950e0f9281f9cc1d38b7
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170213
+%global gitdate 20170218
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 
@@ -10,7 +10,7 @@
 
 Name:		dnfdragora
 Version:	0.0.0
-Release:	0.113%{?git_rel}%{?dist}
+Release:	0.114%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -118,6 +118,9 @@ fi
 
 
 %changelog
+* Sun Feb 19 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.114.git20170218.58bd424
+- New snapshot
+
 * Wed Feb 15 2017 Igor Gnatenko <ignatenko@redhat.com> - 0.0.0-0.113.git20170213.289d170
 - Rebuild for brp-python-bytecompile
 
