@@ -1,21 +1,29 @@
-# No proper release-tags, yet.  :(
+# For release builds set to 1, for snapshots set to 0
+%global relbuild 1
+
+%if !0%{?relbuild}
 %global commit 58bd4242a621ea109d33950e0f9281f9cc1d38b7
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170218
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
+%endif # !0%%{?relbuild}
 
 # CMake builds out of tree.
 %global _cmake_build_subdir %{_target_platform}
 
 Name:		dnfdragora
-Version:	0.0.0
-Release:	0.114%{?git_rel}%{?dist}
+Version:	1.0.0
+Release:	1%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
 URL:		https://github.com/manatools/%{name}
+%if 0%{?relbuild}
+Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+%else  # 0%%{?relbuild}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
+%endif # 0%%{?relbuild}
 
 BuildArch:	noarch
 
@@ -47,7 +55,11 @@ using Qt 5, GTK+ 3, or ncurses interfaces.
 
 
 %prep
+%if 0%{?relbuild}
+%autosetup -p 1
+%else  # 0%%{?relbuild}
 %autosetup -n %{name}-%{commit} -p 1
+%endif # 0%%{?relbuild}
 %{__mkdir_p} %{_cmake_build_subdir}
 
 
@@ -118,6 +130,9 @@ fi
 
 
 %changelog
+* Sun Feb 19 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-1
+- New upstream release (rhbz#1424827)
+
 * Sun Feb 19 2017 Björn Esser <besser82@fedoraproject.org> - 0.0.0-0.114.git20170218.58bd424
 - New snapshot
 
