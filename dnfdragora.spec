@@ -2,7 +2,7 @@
 %global relbuild 0 
 
 %if !0%{?relbuild}
-%global commit b0b2c9a55de7817e6b60444f1c247f49c3ca3f02
+%global commit ae5163e45515a5065bbec10c0ee2080e9d45f396 
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170226
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	2%{?git_rel}%{?dist}
+Release:	3%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -130,6 +130,9 @@ fi
 
 
 %changelog
+* Sun Feb 26 2017 Christian Dersch <lupinix@mailbox.org> - 1.0.0-3.git20170226.ae5163e
+- updated to snapshot fixing behaviour on start without network
+
 * Sun Feb 26 2017 Christian Dersch <lupinix@mailbox.org> - 1.0.0-2.git20170226.b0b2c9a
 - updated to snapshot fixing some minor issues
 
