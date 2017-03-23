@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	4%{?git_rel}%{?dist}
+Release:	5%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -41,6 +41,7 @@ BuildRequires:	python3-yui
 Requires:	dnf			>= 1.0.9
 Requires:	filesystem
 Requires:	hicolor-icon-theme
+Requires:	yui-mga-tui
 Requires:	python3-dnfdaemon
 Requires:	python3-PyYAML
 Requires:	python3-yui		>= 1.1.1-10
@@ -52,6 +53,28 @@ Requires:	python3-yui		>= 1.1.1-10
 %{name} is written in Python 3 and uses libYui, the widget
 abstraction library written by SUSE, so that it can be run
 using Qt 5, GTK+ 3, or ncurses interfaces.
+
+
+%package gui
+Summary:	Meta-package to pull the needed dependencies for %{name} GUI-mode
+
+Requires:	%{name}			== %{version}-%{release}
+Requires:	yui-mga-gui
+
+# Yumex-DNF is dead.  Let's use dnfdragora-gui as drop-in replacement.
+#if (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30) || (0%%{?rhel} >=8 && 0%%{?rhel} <= 11)
+#Obsoletes:	yumex-dnf		<= 4.3.3-100
+#endif # (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30) || (0%%{?rhel} >=8 && 0%%{?rhel} <= 11)
+
+%description gui
+%{name} is a DNF frontend, based on rpmdragora from Mageia
+(originally rpmdrake) Perl code.
+
+%{name} is written in Python 3 and uses libYui, the widget
+abstraction library written by SUSE, so that it can be run
+using Qt 5, GTK+ 3, or ncurses interfaces.
+
+Meta-package to pull the needed dependencies for %{name} GUI-mode.
 
 
 %prep
@@ -128,8 +151,15 @@ fi
 %{_mandir}/man1/%{name}.1*
 %{python3_sitelib}/%{name}
 
+%files gui
+%dir %{_sysconfdir}/%{name}
+
 
 %changelog
+* Thu Mar 23 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-5.git20170322.798975a
+- Add gui-subpkg
+- Prepare obsoletion of Yumex-DNF
+
 * Thu Mar 23 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-4.git20170322.798975a
 - Updated to snapshot fixing an issue with the ncurses interface
 
