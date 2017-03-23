@@ -1,10 +1,10 @@
 # For release builds set to 1, for snapshots set to 0
-%global relbuild 0 
+%global relbuild 0
 
 %if !0%{?relbuild}
-%global commit ae5163e45515a5065bbec10c0ee2080e9d45f396 
+%global commit 798975a2be71e9c4cf5f27c3d6079e3b53502c8a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170226
+%global gitdate 20170322
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	3%{?git_rel}%{?dist}
+Release:	4%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -130,6 +130,9 @@ fi
 
 
 %changelog
+* Thu Mar 23 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-4.git20170322.798975a
+- Updated to snapshot fixing an issue with the ncurses interface
+
 * Sun Feb 26 2017 Christian Dersch <lupinix@mailbox.org> - 1.0.0-3.git20170226.ae5163e
 - updated to snapshot fixing behaviour on start without network
 
