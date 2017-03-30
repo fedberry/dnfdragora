@@ -2,7 +2,7 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 6f5091206b5cde2439fff3426bb951fb28357795
+%global commit f30c75c99680567db137a59ca0b2ac93d3e5a5a9
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170330
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	7%{?git_rel}%{?dist}
+Release:	8%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -156,6 +156,9 @@ fi
 
 
 %changelog
+* Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-8.git20170330.f30c75c
+- Updated to snapshot fixing a missing comma
+
 * Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-7.git20170330.6f50912
 - Updated to snapshot fixing new dbus-signal with dnf >= 2.2.0
 
