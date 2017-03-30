@@ -145,7 +145,7 @@ fi
 %license AUTHORS LICENSE
 %{_bindir}/%{name}
 %{_datadir}/appdata/*%{name}.appdata.xml
-%{_datadir}/applications/*%{name}.desktop
+%{_datadir}/applications/*%{name}*.desktop
 %{_datadir}/%{name}
 %{_datadir}/icons/hicolor/*/apps/%{name}*
 %{_mandir}/man1/%{name}.1*
@@ -158,6 +158,7 @@ fi
 %changelog
 * Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-8.git20170330.f30c75c
 - Updated to snapshot fixing a missing comma
+- Pick up desktop-file for installing local rpms
 
 * Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-7.git20170330.6f50912
 - Updated to snapshot fixing new dbus-signal with dnf >= 2.2.0
