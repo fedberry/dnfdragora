@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit b8545aa133c537175b47384315ad55c040c55136
+%global commit 6f5091206b5cde2439fff3426bb951fb28357795
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170325
+%global gitdate 20170330
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	6%{?git_rel}%{?dist}
+Release:	7%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -156,6 +156,9 @@ fi
 
 
 %changelog
+* Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-7.git20170330.6f50912
+- Updated to snapshot fixing new dbus-signal with dnf >= 2.2.0
+
 * Tue Mar 28 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-6.git20170325.b8545aa
 - Updated to snapshot fixing several translations
 
