@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	8%{?git_rel}%{?dist}
+Release:	9%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -62,9 +62,11 @@ Requires:	%{name}			== %{version}-%{release}
 Requires:	yui-mga-gui
 
 # Yumex-DNF is dead.  Let's use dnfdragora-gui as drop-in replacement.
-#if (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30) || (0%%{?rhel} >=8 && 0%%{?rhel} <= 11)
-#Obsoletes:	yumex-dnf		<= 4.3.3-100
-#endif # (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30) || (0%%{?rhel} >=8 && 0%%{?rhel} <= 11)
+# See:  https://pagure.io/fesco/issue/1690#comment-434558
+%if (0%{?fedora} >= 27 && 0%{?fedora} <= 30)
+Obsoletes:	yumex-dnf		<= 4.3.3-4
+Provides:	yumex-dnf		== 4.3.3-5
+%endif # (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30)
 
 %description gui
 %{name} is a DNF frontend, based on rpmdragora from Mageia
@@ -156,6 +158,10 @@ fi
 
 
 %changelog
+* Fri Mar 31 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-9.git20170330.f30c75c
+- Replace and obsolete Yumex-DNF
+  See:  https://pagure.io/fesco/issue/1690#comment-434558
+
 * Thu Mar 30 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-8.git20170330.f30c75c
 - Updated to snapshot fixing a missing comma
 - Pick up desktop-file for installing local rpms
