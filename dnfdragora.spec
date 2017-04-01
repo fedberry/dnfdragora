@@ -2,7 +2,7 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit d018d08bad39de12d048cc70760d15bb15b5ef69
+%global commit b97db688d4bfd518226c9d24e8d2fe312c1f0205
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170401
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	10%{?git_rel}%{?dist}
+Release:	11%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -93,7 +93,6 @@ pushd %{_cmake_build_subdir}
 %cmake								\
 	-DCHECK_RUNTIME_DEPENDENCIES=ON				\
 	-DENABLE_COMPS=ON					\
-	-Wno-dev						\
 	..
 popd
 %make_build -C %{_cmake_build_subdir}
@@ -152,6 +151,9 @@ fi
 
 
 %changelog
+* Sat Apr 01 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-11.git20170401.b97db68
+- Updated to snapshot fixing some issues with the build-system
+
 * Sat Apr 01 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-10.git20170401.d018d08
 - Updated to snapshot adding manpages and fixing some translations
 
