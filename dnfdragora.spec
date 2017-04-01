@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit f30c75c99680567db137a59ca0b2ac93d3e5a5a9
+%global commit d018d08bad39de12d048cc70760d15bb15b5ef69
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170330
+%global gitdate 20170401
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	9%{?git_rel}%{?dist}
+Release:	10%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -30,12 +30,12 @@ BuildArch:	noarch
 BuildRequires:	cmake			>= 3.4.0
 BuildRequires:	desktop-file-utils
 BuildRequires:	gettext
-BuildRequires:	help2man
 BuildRequires:	libappstream-glib
 BuildRequires:	pkgconfig
 BuildRequires:	python3-devel		>= 3.4.0
 BuildRequires:	python3-dnfdaemon
 BuildRequires:	python3-PyYAML
+BuildRequires:	python3-sphinx
 BuildRequires:	python3-yui
 
 Requires:	dnf			>= 1.0.9
@@ -103,15 +103,6 @@ popd
 %make_install -C %{_cmake_build_subdir}
 %find_lang %{name}
 
-# Create man-page.
-%{__mkdir_p} %{buildroot}%{_mandir}/man1
-export PYTHONPATH='%{buildroot}%{python3_sitelib}'
-%{_bindir}/help2man -s 1 -N					\
-	--version-string='%{version}%{?git_ver}'		\
-	-o %{buildroot}%{_mandir}/man1/%{name}.1		\
-	%{buildroot}%{_bindir}/%{name}
-unset PYTHONPATH
-
 
 %check
 # Validate desktop-files.
@@ -127,6 +118,7 @@ unset PYTHONPATH
 /bin/touch --no-create						\
 	%{_datadir}/icons/hicolor &>/dev/null || :
 
+
 %postun
 if [ $1 -eq 0 ] ; then
 	/bin/touch --no-create					\
@@ -134,6 +126,7 @@ if [ $1 -eq 0 ] ; then
 	%{_bindir}/gtk-update-icon-cache			\
 		%{_datadir}/icons/hicolor &>/dev/null || :
 fi
+
 
 %posttrans
 %{_bindir}/gtk-update-icon-cache				\
@@ -150,14 +143,18 @@ fi
 %{_datadir}/applications/*%{name}*.desktop
 %{_datadir}/%{name}
 %{_datadir}/icons/hicolor/*/apps/%{name}*
-%{_mandir}/man1/%{name}.1*
+%{_mandir}/man5/%{name}*.5*
+%{_mandir}/man8/%{name}*.8*
 %{python3_sitelib}/%{name}
 
 %files gui
-%dir %{_sysconfdir}/%{name}
+# Empty meta-package.
 
 
 %changelog
+* Sat Apr 01 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-10.git20170401.d018d08
+- Updated to snapshot adding manpages and fixing some translations
+
 * Fri Mar 31 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-9.git20170330.f30c75c
 - Replace and obsolete Yumex-DNF
   See:  https://pagure.io/fesco/issue/1690#comment-434558
