@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit b97db688d4bfd518226c9d24e8d2fe312c1f0205
+%global commit f3ca28bd0c00d0ed5a87ed4a5d708e768947ee19
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170401
+%global gitdate 20170402
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	11%{?git_rel}%{?dist}
+Release:	12%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -151,6 +151,9 @@ fi
 
 
 %changelog
+* Sun Apr 02 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-12.git20170402.f3ca28b
+- Updated to snapshot with improved icons and some fixed translations
+
 * Sat Apr 01 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-11.git20170401.b97db68
 - Updated to snapshot fixing some issues with the build-system
 
