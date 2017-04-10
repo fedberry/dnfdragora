@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	15%{?git_rel}%{?dist}
+Release:	16%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -64,8 +64,8 @@ Requires:	yui-mga-gui
 # Yumex-DNF is dead.  Let's use dnfdragora-gui as drop-in replacement.
 # See:  https://pagure.io/fesco/issue/1690#comment-434558
 %if (0%{?fedora} >= 27 && 0%{?fedora} <= 30)
-Obsoletes:	yumex-dnf		<= 4.3.3-4
-Provides:	yumex-dnf		== 4.3.3-5
+Obsoletes:	yumex-dnf		< 4.3.3-5
+Provides:	yumex-dnf		= 4.3.3-5
 %endif # (0%%{?fedora} >= 27 && 0%%{?fedora} <= 30)
 
 %description gui
@@ -151,6 +151,9 @@ fi
 
 
 %changelog
+* Mon Apr 10 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-16.git20170407.769c37d
+- Adjusted Obsoletes for Yumex-DNF
+
 * Fri Apr 07 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-15.git20170407.769c37d
 - Updated to snapshot fixing several translations
 
