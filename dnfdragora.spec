@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 769c37dbb976bef584c27714e094810c52aa8898
+%global commit 613880522bdac5c0a0fd0d33f8c9cb781c6d9f5b
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170407
+%global gitdate 20170409
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	16%{?git_rel}%{?dist}
+Release:	17%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -59,7 +59,6 @@ using Qt 5, GTK+ 3, or ncurses interfaces.
 Summary:	Meta-package to pull the needed dependencies for %{name} GUI-mode
 
 Requires:	%{name}			== %{version}-%{release}
-Requires:	yui-mga-gui
 
 # Yumex-DNF is dead.  Let's use dnfdragora-gui as drop-in replacement.
 # See:  https://pagure.io/fesco/issue/1690#comment-434558
@@ -151,6 +150,10 @@ fi
 
 
 %changelog
+* Mon Apr 10 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-17.git20170409.6138805
+- Updated to snapshot fixing several translations
+- Use rich-dependencies instead of requiring a virtual package
+
 * Mon Apr 10 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-16.git20170407.769c37d
 - Adjusted Obsoletes for Yumex-DNF
 
