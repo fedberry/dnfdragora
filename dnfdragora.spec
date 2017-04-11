@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 613880522bdac5c0a0fd0d33f8c9cb781c6d9f5b
+%global commit 60988165f84c595a5ac3aa81808f3f569bcb92b8
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170409
+%global gitdate 20170411
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	17%{?git_rel}%{?dist}
+Release:	18%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -24,6 +24,8 @@ Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else  # 0%%{?relbuild}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
 %endif # 0%%{?relbuild}
+
+Patch0:		%{url}/pull/31.patch#/%{name}-1.0.0-fix_recursion_error.patch
 
 BuildArch:	noarch
 
@@ -150,6 +152,10 @@ fi
 
 
 %changelog
+* Tue Apr 11 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-18.git20170411.6098816
+- Add fix from anaselli: `RecursionError: maximum recursion depth exceeded`
+  (rhbz#1439247, #1436508, #1436451, #1440570, #1440565, #1440174)
+
 * Mon Apr 10 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-17.git20170409.6138805
 - Updated to snapshot fixing several translations
 - Use rich-dependencies instead of requiring a virtual package

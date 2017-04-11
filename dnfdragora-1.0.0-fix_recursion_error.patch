@@ -1,0 +1,26 @@
+From 2346c64bd612ce9fe501895b079f71a7fe469711 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Tue, 11 Apr 2017 14:48:12 +0200
+Subject: [PATCH] Fix from anaselli: `RecursionError: maximum recursion depth
+ exceeded`
+
+---
+ dnfdragora/progress_ui.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/dnfdragora/progress_ui.py b/dnfdragora/progress_ui.py
+index 3096142..9840862 100644
+--- a/dnfdragora/progress_ui.py
++++ b/dnfdragora/progress_ui.py
+@@ -74,7 +74,10 @@ def info_sub(self, text) :
+     def set_progress(self, frac, label=None) :
+         if label is not None:
+             self.progressbar.setLabel(label)
+-        self.progressbar.setValue(int(100*frac))
++        val = self.progressbar.value()
++        newval = int(100*frac)
++        if (val != newval) :
++            self.progressbar.setValue(newval)
+         #self.__flush()
+ 
+     def reset_all(self) :
