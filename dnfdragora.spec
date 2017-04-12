@@ -2,7 +2,7 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 60988165f84c595a5ac3aa81808f3f569bcb92b8
+%global commit 3662635626599923d196e8b8a28fe8ec4510a17a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170411
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.0
-Release:	18%{?git_rel}%{?dist}
+Release:	19%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -24,8 +24,6 @@ Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else  # 0%%{?relbuild}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
 %endif # 0%%{?relbuild}
-
-Patch0:		%{url}/pull/31.patch#/%{name}-1.0.0-fix_recursion_error.patch
 
 BuildArch:	noarch
 
@@ -43,7 +41,7 @@ BuildRequires:	python3-yui
 Requires:	dnf			>= 1.0.9
 Requires:	filesystem
 Requires:	hicolor-icon-theme
-Requires:	yui-mga-tui
+Requires:	libyui-mga-ncurses
 Requires:	python3-dnfdaemon
 Requires:	python3-PyYAML
 Requires:	python3-yui		>= 1.1.1-10
@@ -152,6 +150,10 @@ fi
 
 
 %changelog
+* Wed Apr 12 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-19.git20170411.3662635
+- Updated to new snapshot obsoleting patches
+- Fixed dependency on libyui-mga-ncurses
+
 * Tue Apr 11 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-18.git20170411.6098816
 - Add fix from anaselli: `RecursionError: maximum recursion depth exceeded`
   (rhbz#1439247, #1436508, #1436451, #1440570, #1440565, #1440174)
