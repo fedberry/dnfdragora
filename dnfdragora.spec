@@ -1,5 +1,5 @@
 # For release builds set to 1, for snapshots set to 0
-%global relbuild 0
+%global relbuild 1
 
 %if !0%{?relbuild}
 %global commit 3662635626599923d196e8b8a28fe8ec4510a17a
@@ -13,8 +13,8 @@
 %global _cmake_build_subdir %{_target_platform}
 
 Name:		dnfdragora
-Version:	1.0.0
-Release:	19%{?git_rel}%{?dist}
+Version:	1.0.1
+Release:	1%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -150,6 +150,9 @@ fi
 
 
 %changelog
+* Sat Apr 15 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-1
+- New upstream release
+
 * Wed Apr 12 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.0-19.git20170411.3662635
 - Updated to new snapshot obsoleting patches
 - Fixed dependency on libyui-mga-ncurses
