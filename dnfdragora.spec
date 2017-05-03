@@ -1,10 +1,10 @@
 # For release builds set to 1, for snapshots set to 0
-%global relbuild 1
+%global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 3662635626599923d196e8b8a28fe8ec4510a17a
+%global commit 368ee94cb7f04c168ea3cd5cbdea94730ce516cb
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170411
+%global gitdate 20170503
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.1
-Release:	1%{?git_rel}%{?dist}
+Release:	2%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -24,6 +24,8 @@ Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else  # 0%%{?relbuild}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
 %endif # 0%%{?relbuild}
+
+Patch0:		%{url}/pull/41.patch#/%{name}-1.0.1-fix_crash_updater.patch
 
 BuildArch:	noarch
 
@@ -59,6 +61,10 @@ using Qt 5, GTK+ 3, or ncurses interfaces.
 Summary:	Meta-package to pull the needed dependencies for %{name} GUI-mode
 
 Requires:	%{name}			== %{version}-%{release}
+Requires:	libnotify
+Requires:	python3-pillow
+Requires:	python3-pystray
+Requires:	python3-sh
 
 # Yumex-DNF is dead.  Let's use dnfdragora-gui as drop-in replacement.
 # See:  https://pagure.io/fesco/issue/1690#comment-434558
@@ -135,21 +141,33 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.yaml
 %dir %{_sysconfdir}/%{name}
 %doc README.md TODO %{name}.yaml.example
+%exclude %{python3_sitelib}/%{name}/updater.py
+%exclude %{python3_sitelib}/%{name}/__pycache__/updater.cpython*.py?
 %license AUTHORS LICENSE
 %{_bindir}/%{name}
 %{_datadir}/appdata/*%{name}.appdata.xml
-%{_datadir}/applications/*%{name}*.desktop
+%{_datadir}/applications/*%{name}.desktop
+%{_datadir}/applications/*%{name}-localinstall.desktop
 %{_datadir}/%{name}
 %{_datadir}/icons/hicolor/*/apps/%{name}*
 %{_mandir}/man5/%{name}*.5*
 %{_mandir}/man8/%{name}*.8*
-%{python3_sitelib}/%{name}
+%dir %{python3_sitelib}/%{name}
+%{python3_sitelib}/%{name}/*
+
 
 %files gui
-# Empty meta-package.
+%{_bindir}/%{name}-updater
+%{_datadir}/applications/*%{name}-updater.desktop
+%{_sysconfdir}/xdg/autostart/*%{name}*.desktop
+%{python3_sitelib}/%{name}/updater.py
+%{python3_sitelib}/%{name}/__pycache__/updater.cpython*.py?
 
 
 %changelog
+* Wed May 03 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-2.git20170503.368ee94
+- Updated to snapshot adding dnfdragora-updater
+
 * Sat Apr 15 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-1
 - New upstream release
 
