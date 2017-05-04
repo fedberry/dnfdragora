@@ -1,0 +1,836 @@
+From fa79181ed6fe8b2262f0065e6d17889a5e5be673 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Wed, 3 May 2017 22:46:30 +0200
+Subject: [PATCH 1/6] Add option to set interval for checking updates
+
+---
+ dnfdragora.yaml.example            |  1 +
+ dnfdragora.yaml.user_prefs.example |  1 +
+ dnfdragora/dialogs.py              |  6 +++++-
+ dnfdragora/updater.py              | 20 ++++++++++++++++++--
+ etc/dnfdragora.yaml.in             |  1 +
+ man/dnfdragora_yaml.rst            | 13 ++++++++++++-
+ 6 files changed, 38 insertions(+), 4 deletions(-)
+
+diff --git a/dnfdragora.yaml.example b/dnfdragora.yaml.example
+index b06f0ee..c7c22c3 100644
+--- a/dnfdragora.yaml.example
++++ b/dnfdragora.yaml.example
+@@ -1,6 +1,7 @@
+ settings:
+     use_comps: False
+     always_yes: False
++    update_interval: 180
+ #    log_filename: PATH/TO/dnfdragora.log
+ #    log_level_debug: True
+ 
+diff --git a/dnfdragora.yaml.user_prefs.example b/dnfdragora.yaml.user_prefs.example
+index 2752ca4..27d2ac0 100644
+--- a/dnfdragora.yaml.user_prefs.example
++++ b/dnfdragora.yaml.user_prefs.example
+@@ -13,3 +13,4 @@ view:
+ settings:
+     'show updates at startup': False
+     'do not show groups at startup': False
++    'interval for checking updates': 180
+diff --git a/dnfdragora/dialogs.py b/dnfdragora/dialogs.py
+index 41f8a82..7b1ce7a 100644
+--- a/dnfdragora/dialogs.py
++++ b/dnfdragora/dialogs.py
+@@ -393,9 +393,12 @@ def _setupUI(self):
+             showUpdates = settings['show updates at startup']
+         if 'do not show groups at startup' in settings.keys() :
+             showAll = settings['do not show groups at startup']
++        if 'interval for checking updates' in settings.keys() :
++            updateInterval = int(settings['interval for checking updates'])
+ 
+         self.showUpdates =  self.factory.createCheckBox(hbox_middle , _("Show updates next startup"), showUpdates )
+         self.showAll  =  self.factory.createCheckBox(hbox_middle , _("Do not show groups view next startup"), showAll )
++        self.updateInterval = self.factory.createIntField(hbox_middle, _("Interval in minutes to check for updates:"), 30, 720, updateInterval )
+ 
+         self.applyButton = self.factory.createIconButton(hbox_footbar,"",_("&Apply"))
+         self.applyButton.setWeight(0,3)
+@@ -427,7 +430,8 @@ def _handleEvents(self):
+                 elif (widget == self.applyButton) :
+                     self.parent.config.userPreferences['settings'] = {
+                         'show updates at startup' : self.showUpdates.isChecked(),
+-                        'do not show groups at startup'  : self.showAll.isChecked()
++                        'do not show groups at startup' : self.showAll.isChecked(),
++                        'interval for checking updates' : self.updateInterval.value()
+                         }
+                     break
+ 
+diff --git a/dnfdragora/updater.py b/dnfdragora/updater.py
+index fca8f41..d46800f 100644
+--- a/dnfdragora/updater.py
++++ b/dnfdragora/updater.py
+@@ -11,7 +11,7 @@
+ import dnfdaemon.client, gettext, sched, sh, sys, threading, time, yui
+ 
+ from PIL import Image
+-from dnfdragora import misc, ui
++from dnfdragora import config, misc, ui
+ from gettext import gettext as _
+ from pystray import Menu, MenuItem
+ from pystray import Icon as Tray
+@@ -26,6 +26,22 @@ def __init__(self):
+         self.__updater   = threading.Thread(target=self.__update_loop)
+         self.__scheduler = sched.scheduler(time.time, time.sleep)
+ 
++        self.__config         = config.AppConfig('dnfdragora')
++        self.__updateInterval = 180
++
++        if self.__config.systemSettings :
++            settings = {}
++            if 'settings' in self.__config.systemSettings.keys() :
++                settings = self.__config.systemSettings['settings']
++                if 'update_interval' in settings.keys() :
++                    self.__updateInterval = int(settings['update_interval'])
++
++        if self.__config.userPreferences:
++            if 'settings' in self.__config.userPreferences.keys() :
++                settings = self.__config.userPreferences['settings']
++                if 'interval for checking updates' in settings.keys() :
++                    self.__updateInterval = int(settings['interval for checking updates'])
++
+         icon_path = '/usr/share/icons/hicolor/128x128/apps/dnfdragora.png'
+ 
+         try:
+@@ -124,7 +140,7 @@ def __get_updates_func(self, forced, *kwargs):
+     def __update_loop(self):
+         while self.__running == True:
+             if self.__scheduler.empty():
+-                self.__scheduler.enter(30 * 60, 1, self.__get_updates)
++                self.__scheduler.enter(self.__updateInterval * 60, 1, self.__get_updates)
+             self.__scheduler.run(blocking=False)
+             time.sleep(1)
+ 
+diff --git a/etc/dnfdragora.yaml.in b/etc/dnfdragora.yaml.in
+index 6d6289b..e2fab2e 100644
+--- a/etc/dnfdragora.yaml.in
++++ b/etc/dnfdragora.yaml.in
+@@ -1,6 +1,7 @@
+ settings:
+     use_comps: @USE_COMPS@
+     always_yes: False
++    update_interval: 180
+ #    log_filename: PATH/TO/dnfdragora.log
+ #    log_level_debug: True
+ 
+diff --git a/man/dnfdragora_yaml.rst b/man/dnfdragora_yaml.rst
+index a1172b8..b0166cd 100644
+--- a/man/dnfdragora_yaml.rst
++++ b/man/dnfdragora_yaml.rst
+@@ -55,6 +55,12 @@ The configuration-file will be looked up in the previous order of options.
+     If enabled, dnfdragora will assume ``Yes`` where it would normally prompt
+     for confirmation from user input. Default is False.
+ 
++``update_interval``
++    :ref:`integer <integer-label>`
++
++    Sets the interval in minutes, dnfdragora-updater continuously checks for
++    new available updates.
++
+ ``log_filename``
+     :ref:`string <string-label>`
+ 
+@@ -83,7 +89,12 @@ The configuration-file will be looked up in the previous order of options.
+ ``boolean``
+     This is a data type with only two possible values.
+ 
+-    One of following options can be used: 1, 0, True, False, yes, no
++    One of following options can be used: True, False
++
++.. _integer-label:
++
++``integer``
++    It is a whole number that can be written without a fractional component.
+ 
+ .. _string-label:
+ 
+
+From fb9eb79b6e568a3e09e815b31d6c84f80c727e47 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Wed, 3 May 2017 23:16:02 +0200
+Subject: [PATCH 2/6] Fixes for the updater
+
+---
+ bin/dnfdragora            |  5 ++++-
+ dnfdragora/dnf_backend.py |  7 +++++--
+ dnfdragora/ui.py          |  4 ++++
+ dnfdragora/updater.py     | 12 ++++++------
+ 4 files changed, 19 insertions(+), 9 deletions(-)
+
+diff --git a/bin/dnfdragora b/bin/dnfdragora
+index 0968d30..8bf5c5d 100755
+--- a/bin/dnfdragora
++++ b/bin/dnfdragora
+@@ -92,7 +92,10 @@ if __name__ == "__main__":
+             logger.error("Unexpected error: %s ", sys.exc_info()[0])
+         finally:
+             if (main_gui is not None) :
+-                main_gui.backend.quit()
++                try:
++                    main_gui.backend.quit()
++                except:
++                    pass
+             import yui
+             yui.YDialog.deleteAllDialogs()
+             # next line seems to be a workaround to prevent the qt-app from crashing
+diff --git a/dnfdragora/dnf_backend.py b/dnfdragora/dnf_backend.py
+index 80cb689..781ea6f 100644
+--- a/dnfdragora/dnf_backend.py
++++ b/dnfdragora/dnf_backend.py
+@@ -292,8 +292,11 @@ def setup(self):
+     @ExceptionHandler
+     def quit(self):
+         """Quit the dnf backend daemon."""
+-        self.Unlock()
+-        self.Exit()
++        try:
++            self.Unlock()
++            self.Exit()
++        except:
++            pass
+ 
+     @ExceptionHandler
+     def reload(self):
+diff --git a/dnfdragora/ui.py b/dnfdragora/ui.py
+index 245dd1c..06150b9 100644
+--- a/dnfdragora/ui.py
++++ b/dnfdragora/ui.py
+@@ -1239,6 +1239,10 @@ def handleevent(self):
+ 
+         self.loop_has_finished = True
+         self.dialog.destroy()
++        try:
++            self.backend.Unlock()
++        except:
++            pass
+         #self.backend.quit()
+ 
+     def quit(self):
+diff --git a/dnfdragora/updater.py b/dnfdragora/updater.py
+index d46800f..1201fa6 100644
+--- a/dnfdragora/updater.py
++++ b/dnfdragora/updater.py
+@@ -75,7 +75,11 @@ def __shutdown(self, *kwargs):
+             self.__main_gui.quit()
+             while self.__main_gui.loop_has_finished != True:
+                 time.sleep(1)
+-            self.__main_gui.backend.quit()
++            try:
++                self.__backend.Unlock()
++                self.__main_gui.backend.quit()
++            except:
++                pass
+             yui.YDialog.deleteAllDialogs()
+             yui.YUILoader.deleteUI()
+ 
+@@ -91,11 +95,7 @@ def __shutdown(self, *kwargs):
+                         pass
+ 
+             self.__tray.stop()
+-
+-            try:
+-                self.__backend.Exit()
+-            except:
+-                pass
++            self.__backend.Exit()
+ 
+ 
+     def __run_dialog(self, args, *kwargs):
+
+From 89865127b277ff0bf0ce2259f8402700ac647648 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Wed, 3 May 2017 23:22:37 +0200
+Subject: [PATCH 3/6] Add myself to the authors-info
+
+---
+ AUTHORS               | 2 +-
+ dnfdragora/dialogs.py | 5 +++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index e568171..7d3e136 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -3,4 +3,4 @@ Current developers and maintainers:
+ Angelo Naselli <anaselli@linux.it>
+ Neal Gompa     <ngompa13@gmail.com>
+ Matteo Pasotti <matteo.pasotti@gmail.com>
+-
++Björn Esser    <besser82@fedoraproject.org>
+diff --git a/dnfdragora/dialogs.py b/dnfdragora/dialogs.py
+index 7b1ce7a..afee52e 100644
+--- a/dnfdragora/dialogs.py
++++ b/dnfdragora/dialogs.py
+@@ -142,10 +142,11 @@ def __init__(self, parent):
+         self.name    = parent.appname
+         self.version = const.VERSION
+         self.license = "GPLv3"
+-        self.authors = "<h3>%s</h3><ul><li>%s</li><li>%s</li></ul>"%(
++        self.authors = "<h3>%s</h3><ul><li>%s</li><li>%s</li><li>%s</li></ul>"%(
+                             _("Developers"),
+                             "Angelo Naselli &lt;anaselli@linux.it&gt;",
+-                            "Neal   Gompa   &lt;ngompa13@gmail.com&gt;")
++                            "Neal   Gompa   &lt;ngompa13@gmail.com&gt;",
++                            "Björn  Esser   &lt;besser82@fedoraproject.org&gt;")
+         self.description = _("dnfdragora is a DNF frontend that works using GTK, ncurses and QT")
+         self.dialog_mode = yui.YMGAAboutDialog.TABBED
+         # TODO
+
+From b08ce5e947f27d9bbbd281b6b5fbad887566a8f1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Wed, 3 May 2017 23:25:14 +0200
+Subject: [PATCH 4/6] Add translatable strings to the updater
+
+---
+ bin/dnfdragora-updater |   1 +
+ dnfdragora/dialogs.py  |   1 +
+ dnfdragora/updater.py  |  13 ++--
+ po/dnfdragora.pot      | 192 ++++++++++++++++++++++++++++---------------------
+ 4 files changed, 120 insertions(+), 87 deletions(-)
+
+diff --git a/bin/dnfdragora-updater b/bin/dnfdragora-updater
+index 5371cde..2ef22d7 100755
+--- a/bin/dnfdragora-updater
++++ b/bin/dnfdragora-updater
+@@ -1,4 +1,5 @@
+ #!/usr/bin/python3
++# vim: set fileencoding=utf-8 :
+ # vim: set et ts=4 sw=4:
+ #    Copyright 2017 Björn Esser <besser82@fedoraproject.org>
+ #
+diff --git a/dnfdragora/dialogs.py b/dnfdragora/dialogs.py
+index afee52e..d8dfebe 100644
+--- a/dnfdragora/dialogs.py
++++ b/dnfdragora/dialogs.py
+@@ -1,3 +1,4 @@
++# vim: set fileencoding=utf-8 :
+ '''
+ dnfdragora is a graphical package management tool based on libyui python bindings
+ 
+diff --git a/dnfdragora/updater.py b/dnfdragora/updater.py
+index 1201fa6..e3da510 100644
+--- a/dnfdragora/updater.py
++++ b/dnfdragora/updater.py
+@@ -1,3 +1,4 @@
++# vim: set fileencoding=utf-8 :
+ '''
+ dnfdragora is a graphical package management tool based on libyui python bindings
+ 
+@@ -47,7 +48,7 @@ def __init__(self):
+         try:
+             self.__backend = dnfdaemon.client.Client()
+         except dnfdaemon.client.DaemonError as error:
+-            print('Error starting dnfdaemon service: [%s]', str(error))
++            print(_('Error starting dnfdaemon service: [%s]'), str(error))
+             sys.exit(1)
+ 
+         try:
+@@ -59,10 +60,10 @@ def __init__(self):
+ 
+         self.__icon  = Image.open(icon_path)
+         self.__menu  = Menu(
+-            MenuItem('Update', self.__run_update),
+-            MenuItem('Open dnfdragora dialog', self.__run_dnfdragora),
+-            MenuItem('Check for updates', self.__get_updates_forced),
+-            MenuItem('Exit', self.__shutdown)
++            MenuItem(_('Update'), self.__run_update),
++            MenuItem(_('Open dnfdragora dialog'), self.__run_dnfdragora),
++            MenuItem(_('Check for updates'), self.__get_updates_forced),
++            MenuItem(_('Exit'), self.__shutdown)
+         )
+         self.__name  = 'dnfdragora-updater'
+         self.__tray  = Tray(self.__name, self.__icon, self.__name, self.__menu)
+@@ -131,7 +132,7 @@ def __get_updates_func(self, forced, *kwargs):
+                     '-i', 'dnfdragora',
+                     '-u', 'normal',
+                     'dnfdragora',
+-                    '%d updates available.' % update_count
++                    _('%d updates available.') % update_count
+                 )
+         else:
+             update_count = -1
+diff --git a/po/dnfdragora.pot b/po/dnfdragora.pot
+index 2811b35..56af3a6 100644
+--- a/po/dnfdragora.pot
++++ b/po/dnfdragora.pot
+@@ -8,7 +8,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: dnfdragora 0.xx\n"
+ "Report-Msgid-Bugs-To: \n"
+-"POT-Creation-Date: 2017-04-25 23:36+0200\n"
++"POT-Creation-Date: 2017-05-03 23:29+0200\n"
+ "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+ "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+ "Language-Team: LANGUAGE <LL@li.org>\n"
+@@ -76,7 +76,7 @@ msgstr ""
+ 
+ #: bin/dnfdragora:84 bin/dnfdragora:87 bin/dnfdragora:90
+ #: dnfdragora/basedragora.py:60 dnfdragora/basedragora.py:91
+-#: dnfdragora/basedragora.py:131 dnfdragora/ui.py:1111
++#: dnfdragora/basedragora.py:131 dnfdragora/ui.py:1113
+ msgid "Sorry"
+ msgstr ""
+ 
+@@ -173,8 +173,8 @@ msgstr ""
+ msgid "Content"
+ msgstr ""
+ 
+-#: dnfdragora/compsicons.py:40 dnfdragora/groupicons.py:19 dnfdragora/ui.py:332
+-#: dnfdragora/ui.py:346
++#: dnfdragora/compsicons.py:40 dnfdragora/groupicons.py:19 dnfdragora/ui.py:334
++#: dnfdragora/ui.py:348
+ msgid "All"
+ msgstr ""
+ 
+@@ -325,77 +325,81 @@ msgstr ""
+ msgid "Enhancement"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:44
++#: dnfdragora/dialogs.py:45
+ msgid "Transaction result"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:50
++#: dnfdragora/dialogs.py:51
+ msgid "Transaction dependency"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:55 dnfdragora/dialogs.py:477 dnfdragora/dialogs.py:515
+-#: dnfdragora/dialogs.py:551 dnfdragora/dialogs.py:594
++#: dnfdragora/dialogs.py:56 dnfdragora/dialogs.py:483 dnfdragora/dialogs.py:521
++#: dnfdragora/dialogs.py:557 dnfdragora/dialogs.py:600
+ msgid "&Ok"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:56 dnfdragora/dialogs.py:232 dnfdragora/dialogs.py:403
+-#: dnfdragora/dialogs.py:595
++#: dnfdragora/dialogs.py:57 dnfdragora/dialogs.py:234 dnfdragora/dialogs.py:408
++#: dnfdragora/dialogs.py:601
+ msgid "&Cancel"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:75
++#: dnfdragora/dialogs.py:76
+ msgid "replacing "
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:81
++#: dnfdragora/dialogs.py:82
+ msgid "Total size "
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:146
++#: dnfdragora/dialogs.py:147
+ msgid "Developers"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:149
++#: dnfdragora/dialogs.py:151
+ msgid "dnfdragora is a DNF frontend that works using GTK, ncurses and QT"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:192 dnfdragora/dialogs.py:207
++#: dnfdragora/dialogs.py:194 dnfdragora/dialogs.py:209
+ msgid "Repository Management"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:218
+-msgid "Enabled"
++#: dnfdragora/dialogs.py:220 dnfdragora/ui.py:320
++msgid "Name"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:218 dnfdragora/ui.py:318
+-msgid "Name"
++#: dnfdragora/dialogs.py:220
++msgid "Enabled"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:229 dnfdragora/dialogs.py:400 dnfdragora/ui.py:449
++#: dnfdragora/dialogs.py:231 dnfdragora/dialogs.py:405 dnfdragora/ui.py:451
+ msgid "&Apply"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:370 dnfdragora/ui.py:477
++#: dnfdragora/dialogs.py:372 dnfdragora/ui.py:479
+ msgid "User preferences"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:397
++#: dnfdragora/dialogs.py:401
+ msgid "Show updates next startup"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:398
++#: dnfdragora/dialogs.py:402
+ msgid "Do not show groups view next startup"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:644
++#: dnfdragora/dialogs.py:403
++msgid "Interval in minutes to check for updates:"
++msgstr ""
++
++#: dnfdragora/dialogs.py:650
+ msgid "&Yes"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:645
++#: dnfdragora/dialogs.py:651
+ msgid "&No"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:668
++#: dnfdragora/dialogs.py:674
+ #, python-format
+ msgid ""
+ "Do you want to import this GPG key <br>needed to verify the %(pkg)s package?"
+@@ -403,7 +407,7 @@ msgid ""
+ "%(file)s"
+ msgstr ""
+ 
+-#: dnfdragora/dialogs.py:675
++#: dnfdragora/dialogs.py:681
+ msgid "GPG key missed"
+ msgstr ""
+ 
+@@ -427,7 +431,7 @@ msgstr ""
+ msgid "Checking package signatures"
+ msgstr ""
+ 
+-#: dnfdragora/dnf_backend.py:196 dnfdragora/ui.py:998
++#: dnfdragora/dnf_backend.py:196 dnfdragora/ui.py:1000
+ msgid "Applying changes to the system"
+ msgstr ""
+ 
+@@ -988,192 +992,218 @@ msgstr ""
+ msgid "Progress files (%(downloaded)d/%(total)d)"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:157
++#: dnfdragora/ui.py:159
+ msgid "Update information"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:158
++#: dnfdragora/ui.py:160
+ msgid "File list"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:159
++#: dnfdragora/ui.py:161
+ msgid "Changelog"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:160
++#: dnfdragora/ui.py:162
+ msgid "Requirements"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:266
++#: dnfdragora/ui.py:268
+ msgid "Software Management - dnfdragora"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:298
++#: dnfdragora/ui.py:300
+ msgid "Software Management"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:318
+-msgid "Arch"
++#: dnfdragora/ui.py:320
++msgid "Summary"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:318
+-msgid "Release"
++#: dnfdragora/ui.py:320
++msgid "Version"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:318
+-msgid "Summary"
++#: dnfdragora/ui.py:320
++msgid "Release"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:318
+-msgid "Version"
++#: dnfdragora/ui.py:320
++msgid "Arch"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:325
++#: dnfdragora/ui.py:327
+ msgid "Status"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:333
++#: dnfdragora/ui.py:335
+ msgid "Installed"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:334
++#: dnfdragora/ui.py:336
+ msgid "Not installed"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:335
++#: dnfdragora/ui.py:337
+ msgid "To update"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:341
++#: dnfdragora/ui.py:343
+ #, python-format
+ msgid "Show %s and noarch only"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:347
++#: dnfdragora/ui.py:349
+ msgid "Groups"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:409
++#: dnfdragora/ui.py:411
+ msgid "in names"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:410
++#: dnfdragora/ui.py:412
+ msgid "in descriptions"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:411
++#: dnfdragora/ui.py:413
+ msgid "in summaries"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:412
++#: dnfdragora/ui.py:414
+ msgid "in file names"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:433
++#: dnfdragora/ui.py:435
+ msgid "&Search"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:439
++#: dnfdragora/ui.py:441
+ msgid "&Clear search"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:453
++#: dnfdragora/ui.py:455
+ msgid "Ch&eck all"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:457 dnfdragora/ui.py:466
++#: dnfdragora/ui.py:459 dnfdragora/ui.py:468
+ msgid "&Quit"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:462
++#: dnfdragora/ui.py:464
+ msgid "&File"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:463
++#: dnfdragora/ui.py:465
+ msgid "Reset the selection"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:464
++#: dnfdragora/ui.py:466
+ msgid "Refresh Metadata"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:465
++#: dnfdragora/ui.py:467
+ msgid "Repositories"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:476
++#: dnfdragora/ui.py:478
+ msgid "&Options"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:488
++#: dnfdragora/ui.py:490
+ msgid "&Help"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:489
++#: dnfdragora/ui.py:491
+ msgid "Manual"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:490
++#: dnfdragora/ui.py:492
+ msgid "&About"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:516
++#: dnfdragora/ui.py:518
+ msgid "update"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:519
++#: dnfdragora/ui.py:521
+ msgid "locked"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:522
++#: dnfdragora/ui.py:524
+ msgid "installed"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:835
++#: dnfdragora/ui.py:837
+ msgid "Missing information"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:962
++#: dnfdragora/ui.py:964
+ msgid "Search"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1024
++#: dnfdragora/ui.py:1026
+ msgid "Error checking package signatures"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1028
++#: dnfdragora/ui.py:1030
+ msgid "Downloading error"
+ msgid_plural "Downloading errors"
+ msgstr[0] ""
+ msgstr[1] ""
+ 
+-#: dnfdragora/ui.py:1033
++#: dnfdragora/ui.py:1035
+ msgid "Error in transaction"
+ msgid_plural "Errors in transaction"
+ msgstr[0] ""
+ msgstr[1] ""
+ 
+-#: dnfdragora/ui.py:1045
++#: dnfdragora/ui.py:1047
+ msgid "BuildTransaction failure"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1111
++#: dnfdragora/ui.py:1113
+ msgid "Not implemented yet"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1139
+-#, python-format
+-msgid "Package %s cannot be removed"
++#: dnfdragora/ui.py:1141
++msgid "Protected package selected"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1139
+-msgid "Protected package selected"
++#: dnfdragora/ui.py:1141
++#, python-format
++msgid "Package %s cannot be removed"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1215
++#: dnfdragora/ui.py:1217
+ msgid "Unmanaged widget"
+ msgstr ""
+ 
+-#: dnfdragora/ui.py:1217
++#: dnfdragora/ui.py:1219
+ msgid "Unmanaged event"
+ msgstr ""
++
++#: dnfdragora/updater.py:51
++#, python-format
++msgid "Error starting dnfdaemon service: [%s]"
++msgstr ""
++
++#: dnfdragora/updater.py:63
++msgid "Update"
++msgstr ""
++
++#: dnfdragora/updater.py:64
++msgid "Open dnfdragora dialog"
++msgstr ""
++
++#: dnfdragora/updater.py:65
++msgid "Check for updates"
++msgstr ""
++
++#: dnfdragora/updater.py:66
++msgid "Exit"
++msgstr ""
++
++#: dnfdragora/updater.py:135
++#, python-format
++msgid "%d updates available."
++msgstr ""
+
+From 7e080c6d14767a718386a0123abbd581ac3d8c69 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Wed, 3 May 2017 23:39:56 +0200
+Subject: [PATCH 5/6] Make updater executable from checkout
+
+---
+ bin/dnfdragora-updater | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/bin/dnfdragora-updater b/bin/dnfdragora-updater
+index 2ef22d7..1dd14dc 100755
+--- a/bin/dnfdragora-updater
++++ b/bin/dnfdragora-updater
+@@ -11,6 +11,15 @@
+ #    License: GPLv3
+ #
+ 
++import os, sys
++
++if sys.path[0] is not '/usr/bin':
++    # We know this script is running from a git checkout
++    SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
++    SRC_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "./"))
++    SRC_BIN_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "bin/"))
++    sys.path.insert(0, SRC_DIR)
++
+ if __name__ == "__main__":
+     import dnfdragora.updater
+     dnfdragora.updater.Updater().main()
+
+From e865a252dbf6e5a19474dffba6b08c9955347524 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Thu, 4 May 2017 00:18:12 +0200
+Subject: [PATCH 6/6] Add version-option to manpage
+
+---
+ man/dnfdragora.rst | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/man/dnfdragora.rst b/man/dnfdragora.rst
+index 034ee5b..f01f4aa 100644
+--- a/man/dnfdragora.rst
++++ b/man/dnfdragora.rst
+@@ -77,6 +77,9 @@ can be run using Qt 5, GTK+ 3, or ncurses interfaces.
+ ``--install <RPM-Packages …>``
+     Install local rpm packages.
+ 
++``--version``
++    Show application version and exit.
++
+ ``--exit``
+     Force dnfdaemon dbus services used by dnfdragora to exit.
+ 

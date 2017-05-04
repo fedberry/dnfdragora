@@ -2,7 +2,7 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit 368ee94cb7f04c168ea3cd5cbdea94730ce516cb
+%global commit ca792560f54db8e025d5b2640239d07c833b7bbe
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global gitdate 20170503
 %global git_ver -git%{gitdate}.%{shortcommit}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.1
-Release:	2%{?git_rel}%{?dist}
+Release:	3%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -25,7 +25,7 @@ Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
 %endif # 0%%{?relbuild}
 
-Patch0:		%{url}/pull/41.patch#/%{name}-1.0.1-fix_crash_updater.patch
+Patch0:		%{url}/pull/42.patch#/%{name}-1.0.1-improve_updater.patch
 
 BuildArch:	noarch
 
@@ -165,6 +165,9 @@ fi
 
 
 %changelog
+* Thu May 04 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-3.git20170503.ca79256
+- Updated to snapshot adding some stability improvements
+
 * Wed May 03 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-2.git20170503.368ee94
 - Updated to snapshot adding dnfdragora-updater
 
