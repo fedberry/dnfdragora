@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit ca792560f54db8e025d5b2640239d07c833b7bbe
+%global commit c525448d7c1539a3a361669942ddcfa539382430
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170503
+%global gitdate 20170504
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.1
-Release:	3%{?git_rel}%{?dist}
+Release:	4%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -24,8 +24,6 @@ Source0:	%{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else  # 0%%{?relbuild}
 Source0:	%{url}/archive/%{commit}.tar.gz#/%{name}-%{version}%{?git_ver}.tar.gz
 %endif # 0%%{?relbuild}
-
-Patch0:		%{url}/pull/42.patch#/%{name}-1.0.1-improve_updater.patch
 
 BuildArch:	noarch
 
@@ -140,7 +138,7 @@ fi
 %files -f %{name}.lang
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.yaml
 %dir %{_sysconfdir}/%{name}
-%doc README.md TODO %{name}.yaml.example
+%doc README.md TODO %{name}.yaml*.example
 %exclude %{python3_sitelib}/%{name}/updater.py
 %exclude %{python3_sitelib}/%{name}/__pycache__/updater.cpython*.py?
 %license AUTHORS LICENSE
@@ -165,6 +163,9 @@ fi
 
 
 %changelog
+* Thu May 04 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-4.git20170504.c525448
+- Updated to snapshot containing all patches and improvements
+
 * Thu May 04 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-3.git20170503.ca79256
 - Updated to snapshot adding some stability improvements
 
