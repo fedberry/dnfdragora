@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.1
-Release:	5%{?git_rel}%{?dist}
+Release:	6%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -163,6 +163,9 @@ fi
 
 
 %changelog
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.1-6.git20170505.2a3b056
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Thu May 04 2017 Björn Esser <besser82@fedoraproject.org> - 1.0.1-5.git20170505.2a3b056
 - Updated to snapshot adding new translations
 
