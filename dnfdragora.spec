@@ -2,9 +2,9 @@
 %global relbuild 0
 
 %if !0%{?relbuild}
-%global commit e3d77a73c1781b96bb2e93f070b620d2349d0220
+%global commit e5915eb74373726b9bac39144dfe75a88b379114
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global gitdate 20170813
+%global gitdate 20171112
 %global git_ver -git%{gitdate}.%{shortcommit}
 %global git_rel .git%{gitdate}.%{shortcommit}
 %endif # !0%%{?relbuild}
@@ -14,7 +14,7 @@
 
 Name:		dnfdragora
 Version:	1.0.1
-Release:	6%{?git_rel}%{?dist}
+Release:	7%{?git_rel}%{?dist}
 Summary:	DNF package-manager based on libYui abstraction
 
 License:	GPLv3+
@@ -163,6 +163,9 @@ fi
 
 
 %changelog
+* Thu Nov 23 2017 Vaughan Agrez <devel at agrez dot net> - 1.0.1-7.git20171112.e5915eb
+- Update to git commit e5915eb74373726b9bac39144dfe75a88b379114
+
 * Mon Aug 14 2017 Vaughan Agrez <devel at agrez dot net> - 1.0.1-6.git20170813.e3d77a7
 - Update to git commit e3d77a73c1781b96bb2e93f070b620d2349d0220
 
